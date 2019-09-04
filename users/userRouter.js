@@ -23,11 +23,11 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:id', validateUserId, (req, res) => {
-    const userBody = req.user;
+    const userInfo = req.user;
 
-    UserDb.getById(userBody.id)
+    UserDb.getById(userInfo.id)
     .then(user => {
-        res.status(200).json(userBody)
+        res.status(200).json(user)
     })
     .catch(err => {
         res.status(500).json({ error: 'The user data cannot be accessed' })
@@ -49,13 +49,12 @@ router.put('/:id', (req, res) => {
 //custom middleware
 
 function validateUserId(req, res, next) {
-    const user = req.body;
     const userId = req.params.id;
-
+    
     UserDb.getById(userId)
     .then(result => {
         if (result) {
-            req.user = user;
+            req.user = result;
         } else {
             res.status(400).json({ message: "invalid user id" });
         }
