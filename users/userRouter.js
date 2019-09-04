@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const UserDb = require('./userDb.js');
+const PostDb = require('../posts/postDb.js');
 
 
 router.post('/', validateUser, (req, res) => {
@@ -21,7 +22,7 @@ router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
     const post = req.post;
     const user = req.user;
 
-    UserDb.insert({ ...post, user_id: user.id })
+    PostDb.insert({ ...post, user_id: user.id })
     .then(added => {
         res.status(201).json(added)
     })
@@ -53,18 +54,28 @@ router.get('/:id', validateUserId, (req, res) => {
     })
 });
 
-router.get('/:id/posts', (req, res) => {
-    const userId = req.params.id;
+router.get('/:id/posts', validateUserId, (req, res) => {
+    const userInfo = req.user;
 
-    UserDb.getById(userId)
+    UserDb.getById(userInfo.id)
     .then(user => {
-
+        res.status(200).json(user);
     })
+    .catch(err => {
+        res.status(500).json({ error: 'The user data cannot be accessed' })    })
 
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateUserId, (req, res) => {
+    const userInfo = req.user;
 
+    UserDb.remove(userInfo.id)
+    .then(deleted => {
+        res.status(200).json(deleted);
+    })
+    .catch(err => {
+        res.status(500).json({ error: 'User could not be removed from the database.' });
+    })
 });
 
 router.put('/:id', (req, res) => {
@@ -79,9 +90,11 @@ function validateUserId(req, res, next) {
     UserDb.getById(userId)
     .then(result => {
         if (result) {
+
             req.user = result;
-            
+
             next();
+
         } else {
             res.status(400).json({ message: "invalid user id" });
         }
@@ -114,7 +127,7 @@ function validateUser(req, res, next) {
 function validatePost(req, res, next) {
     const post = req.body;
 
-    if(Object.getOwnPropertyNames(post).length !== 0) {
+    if (Object.getOwnPropertyNames(post).length !== 0) {
         if (!post.body) {
             res.status(400).json({ message: "missing required text field" });
         } else {
