@@ -5,7 +5,19 @@ const router = express.Router();
 const UserDb = require('./userDb.js');
 
 router.post('/', (req, res) => {
+    const user = req.body;
 
+    if (!user.name) {
+        res.status(400).json({ message: 'Please enter a name for the user.' });
+    } else {
+        UserDb.insert(user)
+        .then(added => {
+            res.status(201).json(added);
+        })
+        .catch(err => {
+            res.status(500).json({ error: 'Error adding user to the database.' });
+        })
+    }
 });
 
 router.post('/:id/posts', (req, res) => {
@@ -50,7 +62,7 @@ router.put('/:id', (req, res) => {
 
 function validateUserId(req, res, next) {
     const userId = req.params.id;
-    
+
     UserDb.getById(userId)
     .then(result => {
         if (result) {
