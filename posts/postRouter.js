@@ -39,6 +39,20 @@ router.delete('/:id', validatePostId, (req, res) => {
 });
 
 router.put('/:id', validatePostId, (req, res) => {
+    const post = req.post;
+    const changes = req.body;
+
+    if (!changes.text) {
+        res.status(400).json({ message: "missing required text field" });
+    } else {
+        PostDb.update(post.id, changes)
+        .then(updated => {
+            res.status(200).json(updated);
+        })
+        .catch(err => {
+            res.status(500).json({ error: 'Post data could not be updated' });
+        })
+    }
 
 });
 

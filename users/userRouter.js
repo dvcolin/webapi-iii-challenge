@@ -144,7 +144,7 @@ function validatePost(req, res, next) {
     const post = req.body;
 
     if (Object.getOwnPropertyNames(post).length !== 0) {
-        if (!post.body) {
+        if (!post.text) {
             res.status(400).json({ message: "missing required text field" });
         } else {
             req.post = post;
