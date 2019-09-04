@@ -14,8 +14,16 @@ router.get('/', (req, res) => {
     })
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', validatePostId, (req, res) => {
+    const post = req.post;
 
+    PostDb.getById(post.id)
+    .then(post => {
+        res.status(200).json(post);
+    })
+    .catch(err => {
+        res.status(500).json({ error: 'Error accessing post data' });
+    })
 });
 
 router.delete('/:id', (req, res) => {
@@ -29,7 +37,21 @@ router.put('/:id', (req, res) => {
 // custom middleware
 
 function validatePostId(req, res, next) {
+    const id = req.params.id;
 
+    PostDb.getById(id)
+    .then(post => {
+        if (post) {
+            req.post = post;
+
+            next();
+        } else {
+            res.status(404).json({ message: 'Can not find a post with that ID' })
+        }
+    })
+    .catch(err => {
+        res.status(500).json({ error: 'Post data could not be accessed' });
+    })
 };
 
 module.exports = router;

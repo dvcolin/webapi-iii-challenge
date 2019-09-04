@@ -80,11 +80,13 @@ function validateUserId(req, res, next) {
     .then(result => {
         if (result) {
             req.user = result;
+            
+            next();
         } else {
             res.status(400).json({ message: "invalid user id" });
         }
 
-        next();
+
     })
     .catch(err => {
         console.log(err);
