@@ -26,11 +26,19 @@ router.get('/:id', validatePostId, (req, res) => {
     })
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validatePostId, (req, res) => {
+    const post = req.post;
 
+    PostDb.remove(post.id)
+    .then(deleted => {
+        res.status(200).json(deleted)
+    })
+    .catch(err => {
+        res.status(500).json({ error: 'Error removing post' });
+    })
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validatePostId, (req, res) => {
 
 });
 
