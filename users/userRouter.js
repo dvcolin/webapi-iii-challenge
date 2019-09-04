@@ -4,12 +4,9 @@ const router = express.Router();
 
 const UserDb = require('./userDb.js');
 
-router.post('/', (req, res) => {
-    const user = req.body;
+router.post('/', validateUser, (req, res) => {
+        const user = req.user;
 
-    if (!user.name) {
-        res.status(400).json({ message: 'Please enter a name for the user.' });
-    } else {
         UserDb.insert(user)
         .then(added => {
             res.status(201).json(added);
@@ -17,10 +14,11 @@ router.post('/', (req, res) => {
         .catch(err => {
             res.status(500).json({ error: 'Error adding user to the database.' });
         })
-    }
 });
 
 router.post('/:id/posts', (req, res) => {
+    const userId = req.params.id;
+
 
 });
 
@@ -47,6 +45,12 @@ router.get('/:id', validateUserId, (req, res) => {
 });
 
 router.get('/:id/posts', (req, res) => {
+    const userId = req.params.id;
+
+    UserDb.getById(userId)
+    .then(user => {
+
+    })
 
 });
 
@@ -80,6 +84,19 @@ function validateUserId(req, res, next) {
 };
 
 function validateUser(req, res, next) {
+    const user = req.body;
+
+    if (Object.getOwnPropertyNames(user).length !== 0) {
+        if (!user.name) {
+            console.log(user);
+            res.status(400).json({ message: "missing required name field" });
+        } else {
+            req.user = user;
+            next();
+        }
+    } else {
+        res.status(400).json({ message: "missing user data" });
+    }
 
 };
 
