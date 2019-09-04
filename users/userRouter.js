@@ -78,7 +78,23 @@ router.delete('/:id', validateUserId, (req, res) => {
     })
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validateUserId, (req, res) => {
+    const userInfo = req.user;
+    const changes = req.body;
+
+    if (!changes.name) {
+        res.status(400).json({ message: "missing required name field" });
+    } else {
+        UserDb.update(userInfo.id, changes)
+        .then(updated => {
+            res.status(200).json(updated);
+        })
+        .catch(err => {
+            res.status(500).json({ error: 'User could not be updated.' });
+            console.log(changes);
+        })
+    }
+
 
 });
 
